@@ -25,11 +25,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY =\
     'django-insecure-ccow$tz_=9%dxu4(0%^(z%nx32#s@(zt9$ih@)5l54yny)wm-0'
 
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'https://ddkntakiruti-8000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/']
-CSRF_TRUSTED_ORIGINS = ['https://ddkntakiruti-8000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/']
+ALLOWED_HOSTS = [
+    'localhost', 
+    'ddkntakiruti-8000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://ddkntakiruti-8000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai'
+]
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
@@ -62,7 +71,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR,'frontend/static')
+            os.path.join(BASE_DIR, 'frontend/static'),
+            os.path.join(BASE_DIR, 'frontend/build'),
+            os.path.join(BASE_DIR, 'frontend/build/static'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -75,6 +86,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'djangoproj.wsgi.application'
 
@@ -132,7 +144,9 @@ MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 MEDIA_URL = '/media/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend/static')
+    os.path.join(BASE_DIR, 'frontend/static'),
+    os.path.join(BASE_DIR, 'frontend/build'),
+    os.path.join(BASE_DIR, 'frontend/build/static'),
 ]
 
 # Default primary key field type
