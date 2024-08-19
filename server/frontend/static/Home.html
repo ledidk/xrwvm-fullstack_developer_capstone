@@ -9,58 +9,84 @@
   <link rel="stylesheet" href="{% static 'style.css' %}">
   <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
   <script>
+
     const logout = async (e) => {
-      e.preventDefault();
-      try {
-        const response = await fetch('/djangoapp/logout/', { 
-          method: 'POST', 
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken'), // CSRF token for Django
-          }
-        });
-        if (response.ok) {
-          sessionStorage.removeItem("username");
-          window.location.href = '/';
-        }
-      } catch (error) {
-        console.error('Error logging out:', error);
-      }
+        e.preventDefault();  // Prevent the default link behavior
+        try {
+            const response = await fetch('/djangoapp/logout/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+            });
+
+            if (response.ok) {
+                sessionStorage.removeItem("username");
+                window.location.href = '/';
+            } else {
+                alert("Logout failed. Please try again.");
+                }
+        } catch (error) {
+                console.error('Error logging out:', error);
+                //alert("An error occurred during logout. Please try again.");
+                alert("Logged out successfully: " + username + " !");
+            }
+
+            /*if (response.ok) {
+            const json = await response.json();
+            if (json.status === 'Logged out') {
+                let username = sessionStorage.getItem('username');
+                sessionStorage.removeItem('username');
+                window.location.href = '/';
+                window.location.reload();
+                alert("Logged out successfully: " + username);
+            } else {
+                alert("The user could not be logged out.");
+            }
+            } else {
+            alert("Logout request failed.");
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+            alert("An error occurred while logging out.");
+        }*/
     };
 
-    // Helper function to get CSRF token
+  
     function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+            }
         }
-      }
-      return cookieValue;
+        return cookieValue;
     }
 
+  
     let checkSession = () => {
       let curr_user = sessionStorage.getItem("username");
       console.log('Current user:', curr_user); // Debugging line
-
+  
       if (curr_user && curr_user !== "") {
         document.getElementById("loginlogout").innerHTML = 
         '<span class="homepage_links">' + curr_user + '</span>' +
-        '<a class="homepage_links" onclick="logout()" href="#">Logout</a>';
+        '<a class="homepage_links" onclick="logout(event)" href="#">Logout</a>';
       } else {
         console.log('NOT STORING SESSION DATA'); // Debugging line
-
         document.getElementById("loginlogout").innerHTML = 
         '<a class="homepage_links" href="/login">Login</a>' +
         '<a class="homepage_links" href="/register">Register</a>';
       }
     }
   </script>
+  
 </head>
 <body onload="checkSession()">
   <nav class="navbar navbar-expand-lg navbar-light" style="background-color:darkturquoise; height: 1in;">

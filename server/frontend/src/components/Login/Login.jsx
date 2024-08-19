@@ -3,13 +3,12 @@ import "./Login.css";
 import Header from '../Header/Header';
 
 const Login = ({ onClose }) => {
-
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [open, setOpen] = useState(true);
 
-  // Construct the login URL based on the current origin
   const login_url = `${window.location.origin}/djangoapp/login`;
+  const logout_url = `${window.location.origin}/djangoapp/logout/`;
 
   // Login function
   const login = async (e) => {
@@ -21,7 +20,7 @@ const Login = ({ onClose }) => {
         headers: {
           "Content-Type": "application/json",
           // Include CSRF token if needed
-          // "X-CSRFToken": getCookie('csrftoken'), 
+          // "X-CSRFToken": getCookie('csrftoken'),
         },
         body: JSON.stringify({
           userName: userName,
@@ -41,6 +40,45 @@ const Login = ({ onClose }) => {
       alert("An error occurred during login. Please try again.");
     }
   };
+
+  // Logout function
+  const logout = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(logout_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'), // Ensure CSRF token is included
+        }
+      });
+
+      if (response.ok) {
+        sessionStorage.removeItem('username');
+        window.location.href = '/';
+      } else {
+        alert("Logout failed.");
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+      alert("An error occurred during logout. Please try again.");
+    }
+  };
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
 
   // Redirect to home page if login was successful
   if (!open) {
@@ -85,6 +123,8 @@ const Login = ({ onClose }) => {
               <input className="action_button" type="button" value="Cancel" onClick={() => setOpen(false)} />
             </div>
             <a className="loginlink" href="/register">Register Now</a>
+            {/* Add Logout Link */}
+            <a className="homepage_links" href="#" onClick={logout}>Logout</a>
           </form>
         </div>
       </div>
