@@ -124,7 +124,6 @@ const Login = ({ onClose }) => {
             </div>
             <a className="loginlink" href="/register">Register Now</a>
             {/* Add Logout Link */}
-            <a className="homepage_links" href="#" onClick={logout}>Logout</a>
           </form>
         </div>
       </div>
