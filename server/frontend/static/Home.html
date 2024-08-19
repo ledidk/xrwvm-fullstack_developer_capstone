@@ -10,7 +10,24 @@
   <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
   <script>
 
-    const logout = async (e) => {
+    let logout_url = window.location.origin+"/djangoapp/logout";
+    const res = await fetch(logout_url, {
+        method: "GET",
+    });
+
+    const json = await res.json();
+    if (json) {
+        let username = sessionStorage.getItem('username');
+        sessionStorage.removeItem('username');
+        window.location.href = window.location.origin;
+        window.location.reload();
+        alert("Logging out "+username+"...")
+    }
+    else {
+        alert("The user could not be logged out.")
+    }
+
+    /*const logout = async (e) => {
         e.preventDefault();  // Prevent the default link behavior
         try {
             const response = await fetch('/djangoapp/logout/', {
@@ -23,17 +40,17 @@
 
             if (response.ok) {
                 sessionStorage.removeItem("username");
+                alert("Logged out successfully: " + username);
                 window.location.href = '/';
             } else {
                 alert("Logout failed. Please try again.");
                 }
         } catch (error) {
                 console.error('Error logging out:', error);
-                //alert("An error occurred during logout. Please try again.");
-                alert("Logged out successfully: " + username + " !");
+                alert("Logged out successfully: " + username);
             }
 
-            /*if (response.ok) {
+            if (response.ok) {
             const json = await response.json();
             if (json.status === 'Logged out') {
                 let username = sessionStorage.getItem('username');
@@ -50,8 +67,8 @@
         } catch (error) {
             console.error('Error logging out:', error);
             alert("An error occurred while logging out.");
-        }*/
-    };
+        }
+    };*/
 
   
     function getCookie(name) {
