@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout
 from django.contrib import messages
 from datetime import datetime
-
+from django.shortcuts import redirect
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 import logging
@@ -42,6 +42,7 @@ def logout_user(request):
         request.session.flush()  # Clear all session data
         return JsonResponse({"status": "Logged out"})
     return JsonResponse({"status": "Invalid request"}, status=400)
+
 
 @csrf_exempt
 def registration(request):
