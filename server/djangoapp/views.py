@@ -19,47 +19,63 @@ from .populate import initiate
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-
-# Create your views here.
-
-# Create a `login_request` view to handle sign in request
 @csrf_exempt
 def login_user(request):
-    # Get username and password from request.POST dictionary
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    # Try to check if provide credential can be authenticated
-    user = authenticate(username=username, password=password)
-    data = {"userName": username}
-    if user is not None:
-        # If user is valid, call login method to login current user
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data['userName']
+        password = data['password']
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
+            request.session['username'] = username  # Store username in session
+            return JsonResponse({"userName": username, "status": "Authenticated"})
+        else:
+            return JsonResponse({"status": "Failed"}, status=401)
+    return JsonResponse({"status": "Invalid request"}, status=400)
+
+@csrf_exempt
+def logout_user(request):
+    if request.method == 'POST':
+        logout(request)
+        request.session.flush()  # Clear all session data
+        return JsonResponse({"status": "Logged out"})
+    return JsonResponse({"status": "Invalid request"}, status=400)
+
+@csrf_exempt
+def registration(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data['userName']
+        password = data['password']
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({"status": "User already exists"})
+        user = User.objects.create_user(username=username, password=password)
         login(request, user)
-        data = {"userName": username, "status": "Authenticated"}
-    return JsonResponse(data)
+        return JsonResponse({"status": "Registered and Authenticated", "userName": username})
+    return JsonResponse({"status": "Invalid request"}, status=400)
 
-# Create a `logout_request` view to handle sign out request
-# def logout_request(request):
-# ...
+def get_dealerships(request):
+    # Assuming you have a function to get dealerships
+    dealerships = initiate()  # Example function, replace with actual
+    return render(request, 'djangoapp/index.html', {"dealerships": dealerships})
 
-# Create a `registration` view to handle sign up request
-# @csrf_exempt
-# def registration(request):
-# ...
+def get_dealer_reviews(request, dealer_id):
+    # Replace with actual review retrieval logic
+    reviews = initiate()  # Example function, replace with actual
+    return render(request, 'djangoapp/dealer_reviews.html', {"reviews": reviews})
 
-# # Update the `get_dealerships` view to render the index page with
-# a list of dealerships
-# def get_dealerships(request):
-# ...
+def get_dealer_details(request, dealer_id):
+    # Replace with actual dealer detail retrieval logic
+    dealer_details = initiate()  # Example function, replace with actual
+    return render(request, 'djangoapp/dealer_details.html', {"dealer": dealer_details})
 
-# Create a `get_dealer_reviews` view to render the reviews of a dealer
-# def get_dealer_reviews(request,dealer_id):
-# ...
-
-# Create a `get_dealer_details` view to render the dealer details
-# def get_dealer_details(request, dealer_id):
-# ...
-
-# Create a `add_review` view to submit a review
-# def add_review(request):
-# ...
+def add_review(request, dealer_id):
+    if request.method == "POST":
+        review_text = request.POST.get('review')
+        # Add review logic here
+        messages.success(request, "Review submitted successfully!")
+        return redirect('djangoapp:dealer_reviews', dealer_id=dealer_id)
+    else:
+        return render(request, 'djangoapp/add_review.html', {"dealer_id": dealer_id})
