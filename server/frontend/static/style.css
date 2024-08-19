@@ -1,3 +1,27 @@
+.container {
+  max-width: 1200px; 
+  margin: 0 auto;
+  padding: 0 15px; 
+}
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+}
+
+
+#loginlogout {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; 
+}
+
+
+
+
+
 img{
   width: 60%;
   align-self: center;
