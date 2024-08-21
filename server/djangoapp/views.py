@@ -18,6 +18,8 @@ from .populate import initiate
 from django.http import JsonResponse
 from .models import CarMake, CarModel
 
+from .restapis import get_request, analyze_review_sentiments, post_review
+
 
 
 def get_cars(request):
@@ -91,26 +93,45 @@ def registration(request):
         return JsonResponse(data)
 
 
-def get_dealerships(request):
-    # Assuming you have a function to get dealerships
-    dealerships = initiate()  # Example function, replace with actual
-    return render(request, 'djangoapp/index.html', {"dealerships": dealerships})
+#Update the `get_dealerships` render list of dealerships all by default, particular state if state is passed
+def get_dealerships(request, state="All"):
+    if(state == "All"):
+        endpoint = "/fetchDealers"
+    else:
+        endpoint = "/fetchDealers/"+state
+    dealerships = get_request(endpoint)
+    return JsonResponse({"status":200,"dealers":dealerships})
 
 def get_dealer_reviews(request, dealer_id):
-    # Replace with actual review retrieval logic
-    reviews = initiate()  # Example function, replace with actual
-    return render(request, 'djangoapp/dealer_reviews.html', {"reviews": reviews})
+    # if dealer id has been provided
+    if(dealer_id):
+        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
+        reviews = get_request(endpoint)
+        for review_detail in reviews:
+            response = analyze_review_sentiments(review_detail['review'])
+            print(response)
+            review_detail['sentiment'] = response['sentiment']
+        return JsonResponse({"status":200,"reviews":reviews})
+    else:
+        return JsonResponse({"status":400,"message":"Bad Request"})
+
 
 def get_dealer_details(request, dealer_id):
-    # Replace with actual dealer detail retrieval logic
-    dealer_details = initiate()  # Example function, replace with actual
-    return render(request, 'djangoapp/dealer_details.html', {"dealer": dealer_details})
-
-def add_review(request, dealer_id):
-    if request.method == "POST":
-        review_text = request.POST.get('review')
-        # Add review logic here
-        messages.success(request, "Review submitted successfully!")
-        return redirect('djangoapp:dealer_reviews', dealer_id=dealer_id)
+    if(dealer_id):
+        endpoint = "/fetchDealer/"+str(dealer_id)
+        dealership = get_request(endpoint)
+        return JsonResponse({"status":200,"dealer":dealership})
     else:
-        return render(request, 'djangoapp/add_review.html', {"dealer_id": dealer_id})
+        return JsonResponse({"status":400,"message":"Bad Request"})
+
+
+def add_review(request):
+    if(request.user.is_anonymous == False):
+        data = json.loads(request.body)
+        try:
+            response = post_review(data)
+            return JsonResponse({"status":200})
+        except:
+            return JsonResponse({"status":401,"message":"Error in posting review"})
+    else:
+        return JsonResponse({"status":403,"message":"Unauthorized"})
