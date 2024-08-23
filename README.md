@@ -38,6 +38,6 @@ In this capstone project, I designed and built a micro-services based applicatio
 Clone the repository:
 ```bash
 git clone https://github.com/ledidk/xrwvm-fullstack_developer_capstone.git
-cd xrwmv-fullstack_developer_capstone
+cd xrwvm-fullstack_developer_capstone/
 
 
