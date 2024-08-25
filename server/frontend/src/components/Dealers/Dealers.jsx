@@ -13,28 +13,31 @@ const Dealers = () => {
 
   // Load all dealers and populate state options
   const loadDealers = useCallback(() => {
-    // Extract unique states from the static JSON data
-    const uniqueStates = Array.from(new Set(DealersList.map(dealer => dealer.state)));
-    setStates(uniqueStates); // Populate the state dropdown
-    setDealersList(DealersList); // Populate the dealers list with all dealers
+  const uniqueStates = Array.from(new Set(DealersList.map(dealer => dealer.state)));
+    setStates(uniqueStates);
+    setDealersList(DealersList);
   }, [DealersList]);
 
-  // Filter dealers by state
   const filterDealers = (state) => {
     if (state === "All") {
-      loadDealers(); // Load all dealers if "All" is selected
+      loadDealers();
     } else {
       const filteredDealers = DealersList.filter(dealer => dealer.state === state);
-      setDealersList(filteredDealers); // Update dealers list based on selected state
+      setDealersList(filteredDealers);
     }
   };
 
-  // Load all dealers when the component mounts
   useEffect(() => {
     loadDealers();
   }, [loadDealers]);
 
   const isLoggedIn = sessionStorage.getItem("username") != null;
+
+  // Function to handle dealer click and store ID in session storage
+  const handleDealerClick = (id) => {
+    sessionStorage.setItem("dealerId", id);
+    window.location.href = `/dealer/${id}`;
+  };
 
   return (
     <div>
@@ -62,7 +65,7 @@ const Dealers = () => {
           {dealersList.map(dealer => (
             <tr key={dealer.id}>
               <td>{dealer.id}</td>
-              <td><a href={`/dealer/${dealer.id}`}>{dealer.full_name}</a></td>
+              <td><a href="#" onClick={() => handleDealerClick(dealer.id)}>{dealer.full_name}</a></td>
               <td>{dealer.city}</td>
               <td>{dealer.address}</td>
               <td>{dealer.zip}</td>
