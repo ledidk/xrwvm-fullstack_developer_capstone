@@ -1,0 +1,18 @@
+/* Improved styling for select dropdown */
+.select-container {
+    margin: 10px 0;
+  }
+  
+  select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  option {
+    padding: 10px;
+  }
+  
