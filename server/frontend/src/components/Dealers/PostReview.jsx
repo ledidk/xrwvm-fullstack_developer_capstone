@@ -1,35 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import "./Dealers.css";
 import "../assets/style.css";
 import Header from '../Header/Header';
-import DealershipDatabase from "../data/car_records.json";
 
 const PostReview = () => {
   const [dealer, setDealer] = useState({});
   const [review, setReview] = useState("");
-  const [model, setModel] = useState("");
+  const [model, setModel] = useState();
   const [year, setYear] = useState("");
   const [date, setDate] = useState("");
   const [carmodels, setCarmodels] = useState([]);
 
   let curr_url = window.location.href;
-  let root_url = curr_url.substring(0,curr_url.indexOf("postreview"));
+  let root_url = curr_url.substring(0, curr_url.indexOf("postreview"));
   let params = useParams();
   let id = params.id;
-  let dealer_url = root_url+`djangoapp/dealer/${id}`;
-  let review_url = root_url+`djangoapp/add_review`;
+  let dealer_url = root_url + `djangoapp/dealer/${id}`;
+  let review_url = root_url + `djangoapp/add_review`;
+  let carmodels_url = root_url + `djangoapp/get_cars`;
 
-  // Load car list from JSON data
-  const CarList = DealershipDatabase.cars;
+  const get_dealer = useCallback(async () => {
+    const res = await fetch(dealer_url, {
+      method: "GET"
+    });
+    const retobj = await res.json();
+
+    if (retobj.status === 200) {
+      let dealerobjs = Array.from(retobj.dealer);
+      if (dealerobjs.length > 0) {
+        setDealer(dealerobjs[0]);
+      }
+    }
+  }, [dealer_url]);
+
+  const get_cars = useCallback(async () => {
+    const res = await fetch(carmodels_url, {
+      method: "GET"
+    });
+    const retobj = await res.json();
+
+    let carmodelsarr = Array.from(retobj.CarModels);
+    setCarmodels(carmodelsarr);
+  }, [carmodels_url]);
+
+  useEffect(() => {
+    get_dealer();
+    get_cars();
+  }, [get_cars, get_dealer]);
 
   const postreview = async () => {
     let name = sessionStorage.getItem("firstname") + " " + sessionStorage.getItem("lastname");
+    //If the first and second name are stores as null, use the username
     if (name.includes("null")) {
       name = sessionStorage.getItem("username");
     }
     if (!model || review === "" || date === "" || year === "" || model === "") {
-      alert("All details are mandatory");
+      alert("All details are mandatory")
       return;
     }
 
@@ -63,26 +90,6 @@ const PostReview = () => {
     }
   }
 
-  const get_dealer = async () => {
-    const res = await fetch(dealer_url, {
-      method: "GET"
-    });
-    const retobj = await res.json();
-
-    if (retobj.status === 200) {
-      let dealerobjs = Array.from(retobj.dealer);
-      if (dealerobjs.length > 0)
-        setDealer(dealerobjs[0]);
-    }
-  }
-
-  // UseEffect to load dealer data and car models
-  useEffect(() => {
-    get_dealer();
-    // Load car models from JSON
-    setCarmodels(CarList);
-  }, []);
-
   return (
     <div>
       <Header />
@@ -94,19 +101,18 @@ const PostReview = () => {
         </div>
         <div className='input_field'>
           Car Make
-          <select name="cars" id="cars" onChange={(e) => setModel(e.target.value)} value={model}>
-        <option value="" disabled hidden>Choose Car Make and Model</option>
-            {carmodels.map((car, index) => (
-                <option key={index} value={`${car.CarMake} ${car.CarModel}`}>
-                {car.CarMake} {car.CarModel}
-                </option>
-        ))}
-        </select>
-
+          <select name="cars" id="cars" onChange={(e) => setModel(e.target.value)}>
+            <option value="" selected disabled hidden>Choose Car Make and Model</option>
+            {carmodels.map(carmodel => (
+              <option value={carmodel.CarMake + " " + carmodel.CarModel}>{carmodel.CarMake} {carmodel.CarModel}</option>
+            ))}
+          </select>
         </div>
+
         <div className='input_field'>
           Car Year <input type="int" onChange={(e) => setYear(e.target.value)} max={2023} min={2015} />
         </div>
+
         <div>
           <button className='postreview' onClick={postreview}>Post Review</button>
         </div>
@@ -114,4 +120,5 @@ const PostReview = () => {
     </div>
   )
 }
-export default PostReview;
+
+export default PostReview

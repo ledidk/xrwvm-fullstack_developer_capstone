@@ -161,3 +161,40 @@ def add_review(request):
             return JsonResponse({"status":401,"message":"Error in posting review"})
     else:
         return JsonResponse({"status":403,"message":"Unauthorized"})
+
+
+#added 
+def populate_database(request):
+    if request.method == 'POST':
+        try:
+            # Load JSON data from request body
+            data = json.loads(request.body)
+            # Extract car makes and models from data
+            car_makes = data.get('car_makes')
+            car_models = data.get('car_models')
+
+            # Create the car makes and models in the database
+            for make in car_makes:
+                car_make, created = CarMake.objects.get_or_create(name=make)
+
+                for model in car_models[make]:
+                    car_model, created = CarModel.objects.get_or_create(name=model, car_make=car_make)
+
+            return JsonResponse({"message": "Database populated successfully"})
+        except json.JSONDecodeError:
+            # If error, return a response with status 400 (Bad Request)
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    else:
+        # If request method is not POST, return a response with status 405 (Method Not Allowed)
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+def dealers(request):
+    # This function will render a template that should display dealer information.
+    # Ensure the 'dealers_template.html' exists in your templates directory.
+    return render(request, 'dealers_template.html')
+
+def get_dealers_template(request):
+    # Renamed function to avoid conflict with the existing 'get_dealers' function.
+    # This function will render a template that should provide a UI for getting dealer information.
+    # Ensure the 'get_dealers_template.html' exists in your templates directory.
+    return render(request, 'get_dealers_template.html')
