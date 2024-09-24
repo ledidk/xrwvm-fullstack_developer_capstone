@@ -21,17 +21,15 @@ from .models import CarMake, CarModel
 from .restapis import get_request, analyze_review_sentiments, post_review
 
 
-
 def get_cars(request):
-    count = CarMake.objects.filter().count()
-    print(count)
-    if(count == 0):
-        initiate()
-    car_models = CarModel.objects.select_related('car_make')
-    cars = []
-    for car_model in car_models:
-        cars.append({"CarModel": car_model.name, "CarMake": car_model.car_make.name})
-    return JsonResponse({"CarModels":cars})
+    try:
+        # Assuming CarModel is your model for cars
+        cars = CarModel.objects.all()
+        cars_list = [{"CarMake": car.make.name, "CarModel": car.model} for car in cars]  # Ensure correct field access
+        return JsonResponse({"CarModels": cars_list}, status=200)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -116,13 +114,25 @@ def get_dealer_reviews(request, dealer_id):
         return JsonResponse({"status":400,"message":"Bad Request"})
 
 
+# Ensure correct JSON format in get_dealer function
 def get_dealer_details(request, dealer_id):
-    if(dealer_id):
-        endpoint = "/fetchDealer/"+str(dealer_id)
+    if dealer_id:
+        endpoint = f"/fetchDealer/{str(dealer_id)}"
         dealership = get_request(endpoint)
-        return JsonResponse({"status":200,"dealer":dealership})
+        
+        # Log the dealership data
+        logger.info(f"Dealership data received: {dealership}")
+        
+        # Ensure dealership is a valid JSON object or dict
+        if isinstance(dealership, dict):  # Ensure it's a dictionary
+            return JsonResponse({"status": 200, "dealer": dealership})
+        else:
+            logger.error("Received invalid dealership data format.")
+            return JsonResponse({"status": 400, "message": "Bad Request"})
     else:
-        return JsonResponse({"status":400,"message":"Bad Request"})
+        return JsonResponse({"status": 400, "message": "Bad Request"})
+
+
 
 
 def get_dealers(request):
@@ -198,3 +208,43 @@ def get_dealers_template(request):
     # This function will render a template that should provide a UI for getting dealer information.
     # Ensure the 'get_dealers_template.html' exists in your templates directory.
     return render(request, 'get_dealers_template.html')
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def post_review(request, dealer_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # Assuming 'review' is a key in the posted JSON
+            review_text = data['review']
+            # Add logic to save the review associated with the dealer_id
+            # Example: Review.objects.create(dealer_id=dealer_id, review=review_text)
+            
+            return JsonResponse({"status": "success"}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+
+
+def dealer_details(request, dealer_id):
+    return HttpResponse (" dealer details")
+    """if dealer_id:
+        endpoint = f"/fetchDealer/{dealer_id}"
+        dealership = get_request(endpoint)
+        endpoint = f"/fetchReviews/dealer/{dealer_id}"
+        reviews = get_request(endpoint)
+        for review_detail in reviews:
+            response = analyze_review_sentiments(review_detail['review'])
+            review_detail['sentiment'] = response['sentiment']
+        context = {
+            "dealer": dealership,
+            "reviews": reviews
+        }
+        return render(request, 'dealer_details.html', context)
+    else:
+        return JsonResponse({"status": 400, "message": "Bad Request"})"""

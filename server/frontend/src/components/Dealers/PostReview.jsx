@@ -16,6 +16,12 @@ const PostReview = () => {
   let root_url = curr_url.substring(0, curr_url.indexOf("postreview"));
   let params = useParams();
   let id = params.id;
+
+
+   // Log the ID requested in the URL
+  console.log("Requested Dealer ID:", id);
+
+
   let dealer_url = root_url + `djangoapp/dealer/${id}`;
   let review_url = root_url + `djangoapp/add_review`;
   let carmodels_url = root_url + `djangoapp/get_cars`;
@@ -35,19 +41,37 @@ const PostReview = () => {
   }, [dealer_url]);
 
   const get_cars = useCallback(async () => {
-    const res = await fetch(carmodels_url, {
-      method: "GET"
-    });
-    const retobj = await res.json();
+    try {
+        const res = await fetch(carmodels_url, {
+            method: "GET"
+        });
+        const retobj = await res.json();
 
-    let carmodelsarr = Array.from(retobj.CarModels);
-    setCarmodels(carmodelsarr);
+        console.log("Response from server:", retobj);
+
+        if (res.ok && retobj.status === 200 && Array.isArray(retobj.CarModels)) {
+            setCarmodels(retobj.CarModels);
+        } else {
+            console.error("Failed to fetch car models:", retobj);
+        }
+    } catch (error) {
+        console.error("Error fetching car models:", error);
+    }
   }, [carmodels_url]);
+
+
+
+
 
   useEffect(() => {
     get_dealer();
     get_cars();
   }, [get_cars, get_dealer]);
+
+  // Add this after setting the state
+  useEffect(() => {
+    console.log(carmodels); // Check if carmodels is populated correctly
+  }, [carmodels]);
 
   const postreview = async () => {
     let name = sessionStorage.getItem("firstname") + " " + sessionStorage.getItem("lastname");
