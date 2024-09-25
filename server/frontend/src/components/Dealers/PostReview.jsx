@@ -1,8 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import "./Dealers.css";
 import "../assets/style.css";
 import Header from '../Header/Header';
+
+// Import JSON data with different variable names
+import CarDatabase from "../data/car_records.json";
+import ReviewDatabase from "../data/reviews.json";
+import DealershipDatabase from "../data/dealerships.json";
 
 const PostReview = () => {
   const [dealer, setDealer] = useState({});
@@ -12,75 +17,42 @@ const PostReview = () => {
   const [date, setDate] = useState("");
   const [carmodels, setCarmodels] = useState([]);
 
-  let curr_url = window.location.href;
-  let root_url = curr_url.substring(0, curr_url.indexOf("postreview"));
   let params = useParams();
   let id = params.id;
 
-
-   // Log the ID requested in the URL
+  // Log the ID requested in the URL
   console.log("Requested Dealer ID:", id);
 
+  // Load data from the JSON files
+  const CarmodelList = CarDatabase.cars; 
+  const ReviewList = ReviewDatabase.reviews; 
+  const DealershipList = DealershipDatabase.dealerships; 
 
-  let dealer_url = root_url + `djangoapp/dealer/${id}`;
-  let review_url = root_url + `djangoapp/add_review`;
-  let carmodels_url = root_url + `djangoapp/get_cars`;
-
-  const get_dealer = useCallback(async () => {
-    const res = await fetch(dealer_url, {
-      method: "GET"
-    });
-    const retobj = await res.json();
-
-    if (retobj.status === 200) {
-      let dealerobjs = Array.from(retobj.dealer);
-      if (dealerobjs.length > 0) {
-        setDealer(dealerobjs[0]);
-      }
-    }
-  }, [dealer_url]);
-
-  const get_cars = useCallback(async () => {
-    try {
-        const res = await fetch(carmodels_url, {
-            method: "GET"
-        });
-        const retobj = await res.json();
-
-        console.log("Response from server:", retobj);
-
-        if (res.ok && retobj.status === 200 && Array.isArray(retobj.CarModels)) {
-            setCarmodels(retobj.CarModels);
-        } else {
-            console.error("Failed to fetch car models:", retobj);
-        }
-    } catch (error) {
-        console.error("Error fetching car models:", error);
-    }
-  }, [carmodels_url]);
-
-
-
-
-
+  // Fetch dealer info based on the dealership ID
   useEffect(() => {
-    get_dealer();
-    get_cars();
-  }, [get_cars, get_dealer]);
+    const foundDealer = DealershipList.find(dealer => dealer.id === parseInt(id));
+    if (foundDealer) {
+      setDealer(foundDealer);
+    } else {
+      console.error("Dealer not found.");
+    }
 
-  // Add this after setting the state
-  useEffect(() => {
-    console.log(carmodels); // Check if carmodels is populated correctly
-  }, [carmodels]);
+    // Load car models into state
+    if (CarmodelList && CarmodelList.length > 0) {
+      setCarmodels(CarmodelList);
+    } else {
+      console.error("No car models found in the JSON.");
+    }
+  }, [id, DealershipList, CarmodelList]);
 
-  const postreview = async () => {
+  const postReview = () => {
     let name = sessionStorage.getItem("firstname") + " " + sessionStorage.getItem("lastname");
-    //If the first and second name are stores as null, use the username
     if (name.includes("null")) {
       name = sessionStorage.getItem("username");
     }
+
     if (!model || review === "" || date === "" || year === "" || model === "") {
-      alert("All details are mandatory")
+      alert("All details are mandatory");
       return;
     }
 
@@ -88,7 +60,8 @@ const PostReview = () => {
     let make_chosen = model_split[0];
     let model_chosen = model_split[1];
 
-    let jsoninput = JSON.stringify({
+    // Create new review object
+    let newReview = {
       "name": name,
       "dealership": id,
       "review": review,
@@ -97,21 +70,18 @@ const PostReview = () => {
       "car_make": make_chosen,
       "car_model": model_chosen,
       "car_year": year,
-    });
+    };
 
-    console.log(jsoninput);
-    const res = await fetch(review_url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsoninput,
-    });
+    console.log("New Review:", newReview);
 
-    const json = await res.json();
-    if (json.status === 200) {
-      window.location.href = window.location.origin + "/dealer/" + id;
-    }
+    // Simulate saving new review to ReviewList
+    ReviewList.push(newReview);
+
+    // Log updated reviews
+    console.log("Updated Reviews:", ReviewList);
+
+    // Redirect to the dealer page after posting the review
+    window.location.href = window.location.origin + "/dealer/" + id;
   }
 
   return (
@@ -123,26 +93,33 @@ const PostReview = () => {
         <div className='input_field'>
           Purchase Date <input type="date" onChange={(e) => setDate(e.target.value)} />
         </div>
+        <br />
         <div className='input_field'>
           Car Make
-          <select name="cars" id="cars" onChange={(e) => setModel(e.target.value)}>
-            <option value="" selected disabled hidden>Choose Car Make and Model</option>
-            {carmodels.map(carmodel => (
-              <option value={carmodel.CarMake + " " + carmodel.CarModel}>{carmodel.CarMake} {carmodel.CarModel}</option>
-            ))}
+          <select name="cars" id="cars" onChange={(e) => {
+              setModel(e.target.value); 
+              console.log("Selected Car Model:", e.target.value); // Log selected value
+          }}>
+              <option value="" selected disabled hidden>Choose Car Make and Model</option>
+              {carmodels.map((carmodel, index) => (
+                  <option key={index} value={carmodel.make + " " + carmodel.model}>
+                      {carmodel.make} {carmodel.model}
+                  </option>
+              ))}
           </select>
         </div>
+        <br />
 
         <div className='input_field'>
-          Car Year <input type="int" onChange={(e) => setYear(e.target.value)} max={2023} min={2015} />
+          Car Year <input type="number" onChange={(e) => setYear(e.target.value)} max={2023} min={2015} />
         </div>
 
         <div>
-          <button className='postreview' onClick={postreview}>Post Review</button>
+          <button className='postreview' onClick={postReview}>Post Review</button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default PostReview
+export default PostReview;
