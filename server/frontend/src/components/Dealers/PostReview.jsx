@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Updated import
 import "./Dealers.css";
 import "../assets/style.css";
 import Header from '../Header/Header';
@@ -10,22 +10,20 @@ import ReviewDatabase from "../data/reviews.json";
 import DealershipDatabase from "../data/dealerships.json";
 
 const PostReview = () => {
+  console.log("Post Review component rendered"); // Log to confirm rendering
   const [dealer, setDealer] = useState({});
   const [review, setReview] = useState("");
-  const [model, setModel] = useState();
+  const [model, setModel] = useState("");
   const [year, setYear] = useState("");
   const [date, setDate] = useState("");
   const [carmodels, setCarmodels] = useState([]);
+  const navigate = useNavigate(); // Use useNavigate for navigation
 
   let params = useParams();
   let id = params.id;
 
-  // Log the ID requested in the URL
-  console.log("Requested Dealer ID:", id);
-
   // Load data from the JSON files
   const CarmodelList = CarDatabase.cars; 
-  const ReviewList = ReviewDatabase.reviews; 
   const DealershipList = DealershipDatabase.dealerships; 
 
   // Fetch dealer info based on the dealership ID
@@ -46,42 +44,54 @@ const PostReview = () => {
   }, [id, DealershipList, CarmodelList]);
 
   const postReview = () => {
-    let name = sessionStorage.getItem("firstname") + " " + sessionStorage.getItem("lastname");
-    if (name.includes("null")) {
-      name = sessionStorage.getItem("username");
+    try {
+      console.log("Posting Review with the following details:");
+      console.log("Model:", model);
+      console.log("Review:", review);
+      console.log("Date:", date);
+      console.log("Year:", year);
+      
+      let name = sessionStorage.getItem("firstname") + " " + sessionStorage.getItem("lastname");
+      if (name.includes("null")) {
+        name = sessionStorage.getItem("username") || "Anonymous";
+      }
+
+      if (!model || review.trim() === "" || date === "" || year === "") {
+        alert("All details are mandatory");
+        return;
+      }
+
+      let model_split = model.split(" ");
+      let make_chosen = model_split[0];
+      let model_chosen = model_split[1];
+
+      let newReview = {
+        "name": name,
+        "dealership": id,
+        "review": review.trim(),
+        "purchase": true,
+        "purchase_date": date,
+        "car_make": make_chosen,
+        "car_model": model_chosen,
+        "car_year": year,
+      };
+
+      // Initialize reviews if not already present
+      const storedReviews = sessionStorage.getItem("reviews");
+      if (!storedReviews) {
+        sessionStorage.setItem("reviews", JSON.stringify([])); // Initialize as an empty array
+      }
+
+      // Push the new review to the current reviews
+      let currentReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
+      currentReviews.push(newReview);
+      sessionStorage.setItem('reviews', JSON.stringify(currentReviews));
+
+      // Redirect to the dealer's page
+      navigate(`/dealer/${id}`); // Use navigate for navigation
+    } catch (error) {
+      console.error("Error posting review:", error);
     }
-
-    if (!model || review === "" || date === "" || year === "" || model === "") {
-      alert("All details are mandatory");
-      return;
-    }
-
-    let model_split = model.split(" ");
-    let make_chosen = model_split[0];
-    let model_chosen = model_split[1];
-
-    // Create new review object
-    let newReview = {
-      "name": name,
-      "dealership": id,
-      "review": review,
-      "purchase": true,
-      "purchase_date": date,
-      "car_make": make_chosen,
-      "car_model": model_chosen,
-      "car_year": year,
-    };
-
-    console.log("New Review:", newReview);
-
-    // Simulate saving new review to ReviewList
-    ReviewList.push(newReview);
-
-    // Log updated reviews
-    console.log("Updated Reviews:", ReviewList);
-
-    // Redirect to the dealer page after posting the review
-    window.location.href = window.location.origin + "/dealer/" + id;
   }
 
   return (
@@ -109,11 +119,9 @@ const PostReview = () => {
           </select>
         </div>
         <br />
-
         <div className='input_field'>
           Car Year <input type="number" onChange={(e) => setYear(e.target.value)} max={2023} min={2015} />
         </div>
-
         <div>
           <button className='postreview' onClick={postReview}>Post Review</button>
         </div>

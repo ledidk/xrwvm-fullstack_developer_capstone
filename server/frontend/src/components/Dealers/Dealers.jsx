@@ -4,6 +4,7 @@ import "../assets/style.css";
 import Header from '../Header/Header';
 import review_icon from "../assets/reviewicon.png";
 import DealershipDatabase from "../data/dealerships.json";
+import ReviewDatabase from "../data/reviews.json";
 
 const Dealers = () => {
   const [dealersList, setDealersList] = useState([]);
@@ -28,6 +29,12 @@ const Dealers = () => {
   };
 
   useEffect(() => {
+      // Check if reviews are stored in session storage
+    const storedReviews = sessionStorage.getItem("reviews");
+    if (!storedReviews) {
+      // If not, store the ReviewDatabase in session storage
+      sessionStorage.setItem("reviews", JSON.stringify(ReviewDatabase));
+    }
     loadDealers();
   }, [loadDealers]);
 

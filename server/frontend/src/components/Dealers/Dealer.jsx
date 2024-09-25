@@ -35,14 +35,33 @@ const Dealer = () => {
       setDealer(dealerData);
     }
   };
-
+  
   const get_reviews = () => {
-    const dealerReviews = ReviewList.filter(review => review.dealership === parseInt(id));
+    const storedReviews = sessionStorage.getItem("reviews");
+    console.log("HERE ARE STOREDREVIEWS", storedReviews)
 
-    if (dealerReviews.length > 0) {
-      setReviews(dealerReviews);
+    if (!storedReviews) {
+      // If not, store the ReviewDatabase in session storage
+      sessionStorage.setItem("reviews", JSON.stringify(ReviewList)); // Convert to JSON string
+    }
+
+    // Load reviews from session storage
+    const sessionReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
+    console.log("HERE ARE sessionReviews", sessionReviews)
+
+    // Ensure sessionReviews is an array
+    if (Array.isArray(sessionReviews)) {
+      const dealerReviews = sessionReviews.filter(review => review.dealership === parseInt(id));
+      console.log("HERE ARE REVIEWS for selected id", dealerReviews)
+
+      if (dealerReviews.length > 0) {
+        setReviews(dealerReviews);
+      } else {
+        setUnreviewed(true);
+      }
     } else {
-      setUnreviewed(true);
+      console.error("sessionReviews is not an array:", sessionReviews);
+      setUnreviewed(true); // Or handle it as you see fit
     }
   };
 
