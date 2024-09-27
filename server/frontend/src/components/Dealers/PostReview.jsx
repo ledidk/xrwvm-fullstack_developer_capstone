@@ -71,14 +71,20 @@ const PostReview = () => {
       "car_model": model_chosen,
       "car_year": year,
     };
+    
+
+    // Push the new review to the current reviews
+    //const currentReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
+    //currentReviews.push(newReview);
+    //sessionStorage.setItem('reviews', JSON.stringify(currentReviews));
 
     console.log("New Review:", newReview);
 
     // Simulate saving new review to ReviewList
     ReviewList.push(newReview);
-
+    sessionStorage.setItem('reviews', JSON.stringify(ReviewList));
     // Log updated reviews
-    console.log("Updated Reviews:", ReviewList);
+    //console.log("Updated Reviews:", ReviewList);
 
     // Redirect to the dealer page after posting the review
     window.location.href = window.location.origin + "/dealer/" + id;

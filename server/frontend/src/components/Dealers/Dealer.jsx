@@ -19,9 +19,6 @@ const Dealer = () => {
   const params = useParams();
   const id = params.id;
 
-  // Store the dealer ID in session storage
-  sessionStorage.setItem("dealerId", id);
-
   const DealerList = DealershipDatabase.dealerships; // Load dealership data from the JSON file
   const ReviewList = ReviewDatabase.reviews; // Load review data from the JSON file
 
@@ -38,8 +35,6 @@ const Dealer = () => {
   
   const get_reviews = () => {
     const storedReviews = sessionStorage.getItem("reviews");
-    console.log("HERE ARE STOREDREVIEWS", storedReviews)
-
     if (!storedReviews) {
       // If not, store the ReviewDatabase in session storage
       sessionStorage.setItem("reviews", JSON.stringify(ReviewList)); // Convert to JSON string
@@ -52,10 +47,11 @@ const Dealer = () => {
     // Ensure sessionReviews is an array
     if (Array.isArray(sessionReviews)) {
       const dealerReviews = sessionReviews.filter(review => review.dealership === parseInt(id));
-      console.log("HERE ARE REVIEWS for selected id", dealerReviews)
+      
 
       if (dealerReviews.length > 0) {
         setReviews(dealerReviews);
+        console.log("HERE ARE REVIEWS for selected id", dealerReviews)
       } else {
         setUnreviewed(true);
       }

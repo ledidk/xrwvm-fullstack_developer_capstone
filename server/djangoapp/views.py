@@ -247,8 +247,6 @@ def get_dealers_template(request):
     # Ensure the 'get_dealers_template.html' exists in your templates directory.
     return render(request, 'get_dealers_template.html')
 
-from django.views.decorators.csrf import csrf_exempt
-
 @csrf_exempt
 def post_review(request, dealer_id):
     if request.method == 'POST':
