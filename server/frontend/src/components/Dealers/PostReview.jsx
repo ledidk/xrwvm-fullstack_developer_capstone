@@ -21,11 +21,11 @@ const PostReview = () => {
   let id = params.id;
 
   // Log the ID requested in the URL
-  console.log("Requested Dealer ID:", id);
+  //console.log("Requested Dealer ID:", id);
 
   // Load data from the JSON files
   const CarmodelList = CarDatabase.cars; 
-  const ReviewList = ReviewDatabase.reviews; 
+  let ReviewList = ReviewDatabase.reviews; 
   const DealershipList = DealershipDatabase.dealerships; 
 
   // Fetch dealer info based on the dealership ID
@@ -59,6 +59,18 @@ const PostReview = () => {
     let model_split = model.split(" ");
     let make_chosen = model_split[0];
     let model_chosen = model_split[1];
+
+    const storedReviews = sessionStorage.getItem("reviews");
+    if (!storedReviews) {
+      // If not, store the ReviewDatabase in session storage
+      sessionStorage.setItem("reviews", JSON.stringify(ReviewList)); // Convert to JSON string
+    }
+
+    // Load reviews from session storage
+    const sessionReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
+
+    ReviewList = sessionReviews;
+    //console.log("HERE ARE sessionReviews", sessionReviews)
 
     // Create new review object
     let newReview = {

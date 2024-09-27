@@ -42,7 +42,7 @@ const Dealer = () => {
 
     // Load reviews from session storage
     const sessionReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
-    console.log("HERE ARE sessionReviews", sessionReviews)
+    //console.log("HERE ARE sessionReviews", sessionReviews)
 
     // Ensure sessionReviews is an array
     if (Array.isArray(sessionReviews)) {
@@ -51,7 +51,7 @@ const Dealer = () => {
 
       if (dealerReviews.length > 0) {
         setReviews(dealerReviews);
-        console.log("HERE ARE REVIEWS for selected id", dealerReviews)
+        //console.log("HERE ARE REVIEWS for selected id", dealerReviews)
       } else {
         setUnreviewed(true);
       }
