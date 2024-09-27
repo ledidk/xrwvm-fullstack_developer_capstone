@@ -62,14 +62,15 @@ const PostReview = () => {
 
     // Create new review object
     let newReview = {
+      "id": ReviewList.length + 1, // Add an ID to keep reviews consistent
       "name": name,
-      "dealership": id,
+      "dealership": parseInt(id), // Ensure dealership ID is an integer
       "review": review,
       "purchase": true,
       "purchase_date": date,
       "car_make": make_chosen,
       "car_model": model_chosen,
-      "car_year": year,
+      "car_year": year
     };
     
 
