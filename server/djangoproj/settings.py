@@ -31,7 +31,7 @@ SECRET_KEY =\
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'https://dealerships-nkvc.onrender.com'
+    'https://dealerships-nkvc.onrender.com',
     '127.0.0.1',
     'localhost', 
     'https://ddkntakiruti-8000.theiadockernext-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai'
