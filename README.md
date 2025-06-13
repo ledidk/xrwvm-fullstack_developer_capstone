@@ -40,5 +40,26 @@ Clone the repository:
 git clone https://github.com/ledidk/xrwvm-fullstack_developer_capstone.git
 cd xrwvm-fullstack_developer_capstone/
 
+step 1
 
-March 12th
+cd xrwvm-fullstack_developer_capstone/server
+source env/Scripts/activate
+
+step 2 
+
+cd xrwvm-fullstack_developer_capstone/server/frontend
+npm install
+npm run build
+
+step 3
+
+cd xrwvm-fullstack_developer_capstone/server
+pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
+
+step 4
+
+cd xrwvm-fullstack_developer_capstone/server
+python manage.py runserver
+
