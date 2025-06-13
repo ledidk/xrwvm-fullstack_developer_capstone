@@ -31,8 +31,9 @@ SECRET_KEY =\
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'https://dealerships-nkvc.onrender.com',
-    'localhost', 
+    '127.0.0.1',
+    'localhost',
+    'dealerships.netlify.app',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
