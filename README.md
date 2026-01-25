@@ -1,65 +1,49 @@
-# Full Stack Application Development Project V2
+# XR Dealership Review Platform
 
-Welcome to my Full Stack Application Development Project V2! This project showcases my skills and knowledge in full stack development, as part of the IBM Full Stack Developer Professional Certificate. I have designed and implemented a dynamic user experience using a variety of modern technologies.
+A microservices-based full stack app for managing dealerships and reviewing cars. Built as a capstone project combining React, Django, Node.js, and sentiment analysis.
 
-## Table of Contents
-- [Project Description](#project-description)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+## What's Inside
 
-## Project Description
-In this capstone project, I designed and built a micro-services based application that leverages modern web technologies to create a dynamic and user-friendly experience. This project demonstrates my ability to handle both the front-end and back-end aspects of web development, including the use of containerization and orchestration tools for deployment.
+**Frontend**: React UI for browsing dealerships, viewing inventory, and posting reviews  
+**Backend**: Django REST API managing authentication, dealership data, and review coordination  
+**Database Service**: Node.js/Express layer for car records, dealership info, and reviews  
+**Sentiment Analysis**: Microservice for analyzing review sentiment  
 
-## Features
-- Dynamic user interface built with REACT
-- Robust back-end services using Python and Django
-- Data management with MongoDB
-- Authentication and user management
-- Continuous integration and deployment with GitHub Actions
-- Containerized application with Docker and Kubernetes
+Stack: React | Django | Node.js | MongoDB | Docker | Kubernetes
 
-## Technologies Used
-- **Front-End**: REACT
-- **Back-End**: Python, Django
-- **Database**: MongoDB
-- **Version Control**: Git, GitHub
-- **CI/CD**: GitHub Actions
-- **Containerization**: Docker
-- **Orchestration**: Kubernetes
+## Quick Start
 
-## Installation
+### Prerequisites
+- Python 3.10+
+- Node.js
+- Git
 
-Clone the repository:
+### Setup
+
 ```bash
+# 1. Clone & activate Python environment
 git clone https://github.com/ledidk/xrwvm-fullstack_developer_capstone.git
-cd xrwvm-fullstack_developer_capstone/
-
-step 1
-
 cd xrwvm-fullstack_developer_capstone/server
-source env/Scripts/activate
+source env/Scripts/activate  # Windows: .\myenv\Scripts\activate
 
-step 2 
-
-cd xrwvm-fullstack_developer_capstone/server/frontend
+# 2. Build frontend
+cd frontend
 npm install
 npm run build
+cd ..
 
-step 3
-
-cd xrwvm-fullstack_developer_capstone/server
+# 3. Install Python dependencies & migrate DB
 pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
 
-step 4
-
-cd xrwvm-fullstack_developer_capstone/server
+# 4. Run it
 python manage.py runserver
+```
+
+Navigate to `http://localhost:8000` to see it running.
+
+## Deployment
+
+Docker & Kubernetes configs included. Check `deployment.yaml` and `docker-compose.yml` for containerized setups.
 
