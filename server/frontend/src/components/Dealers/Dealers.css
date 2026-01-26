@@ -98,7 +98,7 @@ select {
 
 option {
   padding: 8px; 
-  color: white; 
+  color: black; 
 }
 
 select:focus {

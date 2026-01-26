@@ -25,7 +25,6 @@ const PostReview = () => {
 
   // Load data from the JSON files
   const CarmodelList = CarDatabase.cars; 
-  let ReviewList = ReviewDatabase.reviews; 
   const DealershipList = DealershipDatabase.dealerships; 
 
   // Fetch dealer info based on the dealership ID
@@ -60,23 +59,14 @@ const PostReview = () => {
     let make_chosen = model_split[0];
     let model_chosen = model_split[1];
 
-    const storedReviews = sessionStorage.getItem("reviews");
-    if (!storedReviews) {
-      // If not, store the ReviewDatabase in session storage
-      sessionStorage.setItem("reviews", JSON.stringify(ReviewList)); // Convert to JSON string
-    }
-
     // Load reviews from session storage
     const sessionReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
 
-    ReviewList = sessionReviews;
-    //console.log("HERE ARE sessionReviews", sessionReviews)
-
     // Create new review object
     let newReview = {
-      "id": ReviewList.length + 1, // Add an ID to keep reviews consistent
+      "id": sessionReviews.length + 1,
       "name": name,
-      "dealership": parseInt(id), // Ensure dealership ID is an integer
+      "dealership": parseInt(id),
       "review": review,
       "purchase": true,
       "purchase_date": date,
@@ -84,20 +74,12 @@ const PostReview = () => {
       "car_model": model_chosen,
       "car_year": year
     };
-    
-
-    // Push the new review to the current reviews
-    //const currentReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
-    //currentReviews.push(newReview);
-    //sessionStorage.setItem('reviews', JSON.stringify(currentReviews));
 
     console.log("New Review:", newReview);
 
-    // Simulate saving new review to ReviewList
-    ReviewList.push(newReview);
-    sessionStorage.setItem('reviews', JSON.stringify(ReviewList));
-    // Log updated reviews
-    //console.log("Updated Reviews:", ReviewList);
+    // Add to session reviews and save
+    sessionReviews.push(newReview);
+    sessionStorage.setItem('reviews', JSON.stringify(sessionReviews));
 
     // Redirect to the dealer page after posting the review
     window.location.href = window.location.origin + "/dealer/" + id;
