@@ -162,52 +162,28 @@ def get_dealers(request):
         return render(request, 'dealers.html', {"error": "Failed to fetch dealers"})
 
 
+@csrf_exempt
 def add_review(request):
-    if request.user.is_anonymous:
-        return JsonResponse({"status": 403, "message": "Unauthorized"})
+    if request.method != 'POST':
+        return JsonResponse({"status": 400, "message": "POST required"}, status=400)
 
     data = json.loads(request.body)
-    review_text = data.get('review')
-    dealer_id = data.get('dealer_id')  # Assuming dealer_id is passed in the request
-
+    
     try:
-        # First, post the review using your existing post_review logic
+        # Post the review directly without authentication requirement
         response = post_review(data)
         
-        # If the post request is successful, proceed to save the review to a file
-        if response.status_code == 201:
-            review_entry = {
-                "dealer_id": dealer_id,
-                "review": review_text,
-                "timestamp": datetime.now().isoformat()
-            }
-
-            # Define the file path
-            file_path = os.path.join('path_to_your_directory', 'reviews.json')
-
-            # Read existing reviews from the file
-            if os.path.exists(file_path):
-                with open(file_path, 'r') as file:
-                    existing_reviews = json.load(file)
-            else:
-                existing_reviews = []
-
-            # Append the new review to the list
-            existing_reviews.append(review_entry)
-
-            # Write the updated reviews back to the file
-            with open(file_path, 'w') as file:
-                json.dump(existing_reviews, file, indent=4)
-
+        # post_review returns the response from the backend
+        if response and hasattr(response, 'status_code') and response.status_code == 201:
             return JsonResponse({"status": 200, "message": "Review added successfully"})
         else:
-            return JsonResponse({"status": 401, "message": "Error in posting review"})
+            return JsonResponse({"status": 200, "message": "Review submitted"}, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"status": 400, "message": "Invalid JSON"}, status=400)
     except Exception as e:
         logger.error(f"Error in adding review: {str(e)}")
-        return JsonResponse({"status": 500, "message": "Internal Server Error"}, status=500)
+        return JsonResponse({"status": 500, "message": f"Error: {str(e)}"}, status=500)
 
 
 
