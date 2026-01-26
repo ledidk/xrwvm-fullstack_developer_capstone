@@ -59,8 +59,19 @@ const PostReview = () => {
     let make_chosen = model_split[0];
     let model_chosen = model_split[1];
 
-    // Load reviews from session storage
-    const sessionReviews = JSON.parse(sessionStorage.getItem('reviews')) || [];
+    // Load reviews from session storage - ensure it's always an array
+    let sessionReviews;
+    try {
+      const stored = sessionStorage.getItem('reviews');
+      sessionReviews = stored ? JSON.parse(stored) : [];
+      // Ensure it's actually an array
+      if (!Array.isArray(sessionReviews)) {
+        sessionReviews = [];
+      }
+    } catch (e) {
+      console.error("Error parsing reviews from sessionStorage:", e);
+      sessionReviews = [];
+    }
 
     // Create new review object
     let newReview = {
