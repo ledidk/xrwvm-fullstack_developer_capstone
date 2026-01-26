@@ -221,7 +221,7 @@ def get_dealers_template(request):
     return render(request, 'get_dealers_template.html')
 
 @csrf_exempt
-def post_review(request, dealer_id):
+def post_review_view(request, dealer_id):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
