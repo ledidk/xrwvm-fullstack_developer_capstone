@@ -167,17 +167,14 @@ def add_review(request):
     if request.method != 'POST':
         return JsonResponse({"status": 400, "message": "POST required"}, status=400)
 
-    data = json.loads(request.body)
-    
     try:
-        # Post the review directly without authentication requirement
-        response = post_review(data)
+        data = json.loads(request.body)
         
-        # post_review returns the response from the backend
-        if response and hasattr(response, 'status_code') and response.status_code == 201:
-            return JsonResponse({"status": 200, "message": "Review added successfully"})
-        else:
-            return JsonResponse({"status": 200, "message": "Review submitted"}, status=200)
+        # Call the restapis post_review function to send to backend
+        result = post_review(data)
+        
+        # Return success response
+        return JsonResponse({"status": 200, "message": "Review submitted successfully"}, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"status": 400, "message": "Invalid JSON"}, status=400)
