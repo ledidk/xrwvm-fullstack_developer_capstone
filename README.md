@@ -23,8 +23,8 @@ Stack: React | Django | Node.js | MongoDB | Docker | Kubernetes
 ```bash
 # 1. Clone & activate Python environment
 git clone https://github.com/ledidk/xrwvm-fullstack_developer_capstone.git
-cd xrwvm-fullstack_developer_capstone/server
-source env/Scripts/activate  # Windows: .\myenv\Scripts\activate
+cd server/
+source myenv/bin/activate  # Windows: .\myenv\Scripts\activate
 
 # 2. Build frontend
 cd frontend
