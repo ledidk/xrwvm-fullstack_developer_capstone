@@ -33,7 +33,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*'] #ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://dealerships-nkvc.onrender.com'
+    'https://dealerships-nkvc.onrender.com',
+    'https://cardealershipreviewportal.onrender.com',
 ]
 
 
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -69,9 +71,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'frontend/static'),
             os.path.join(BASE_DIR, 'frontend/build'),
-            os.path.join(BASE_DIR, 'frontend/build/static'),
+            os.path.join(BASE_DIR, 'frontend/static'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -141,11 +142,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 MEDIA_URL = '/media/'
 
+_build_static = os.path.join(BASE_DIR, 'frontend/build/static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend/static'),
-    os.path.join(BASE_DIR, 'frontend/build'),
-    os.path.join(BASE_DIR, 'frontend/build/static'),
-]
+] + ([_build_static] if os.path.exists(_build_static) else [])
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
