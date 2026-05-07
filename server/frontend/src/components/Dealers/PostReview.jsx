@@ -6,7 +6,6 @@ import Header from '../Header/Header';
 
 // Import JSON data with different variable names
 import CarDatabase from "../data/car_records.json";
-import ReviewDatabase from "../data/reviews.json";
 import DealershipDatabase from "../data/dealerships.json";
 
 const PostReview = () => {
@@ -44,7 +43,7 @@ const PostReview = () => {
     }
   }, [id, DealershipList, CarmodelList]);
 
-  const postReview = () => {
+  const postReview = async () => {
     let name = sessionStorage.getItem("firstname") + " " + sessionStorage.getItem("lastname");
     if (name.includes("null")) {
       name = sessionStorage.getItem("username");
@@ -59,23 +58,7 @@ const PostReview = () => {
     let make_chosen = model_split[0];
     let model_chosen = model_split[1];
 
-    // Load reviews from session storage - ensure it's always an array
-    let sessionReviews;
-    try {
-      const stored = sessionStorage.getItem('reviews');
-      sessionReviews = stored ? JSON.parse(stored) : [];
-      // Ensure it's actually an array
-      if (!Array.isArray(sessionReviews)) {
-        sessionReviews = [];
-      }
-    } catch (e) {
-      console.error("Error parsing reviews from sessionStorage:", e);
-      sessionReviews = [];
-    }
-
-    // Create new review object
     let newReview = {
-      "id": sessionReviews.length + 1,
       "name": name,
       "dealership": parseInt(id),
       "review": review,
@@ -83,17 +66,25 @@ const PostReview = () => {
       "purchase_date": date,
       "car_make": make_chosen,
       "car_model": model_chosen,
-      "car_year": year
+      "car_year": parseInt(year)
     };
 
-    console.log("New Review:", newReview);
-
-    // Add to session reviews and save
-    sessionReviews.push(newReview);
-    sessionStorage.setItem('reviews', JSON.stringify(sessionReviews));
-
-    // Redirect to the dealer page after posting the review
-    window.location.href = window.location.origin + "/dealer/" + id;
+    try {
+      const response = await fetch('/djangoapp/add_review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newReview),
+      });
+      const result = await response.json();
+      if (result.status === 200) {
+        window.location.href = window.location.origin + "/dealer/" + id;
+      } else {
+        alert("Failed to submit review. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error posting review:", error);
+      alert("Error submitting review. Please try again.");
+    }
   }
 
   return (

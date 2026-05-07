@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .populate import initiate
 
 from django.http import JsonResponse
-from .models import CarMake, CarModel
+from .models import CarMake, CarModel, Review
 
 from .restapis import get_request, analyze_review_sentiments, post_review
 import os
@@ -102,17 +102,41 @@ def get_dealerships(request, state="All"):
     return JsonResponse({"status":200,"dealers":dealerships})
 
 def get_dealer_reviews(request, dealer_id):
-    # if dealer id has been provided
-    if(dealer_id):
-        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
-        reviews = get_request(endpoint)
+    if not dealer_id:
+        return JsonResponse({"status": 400, "message": "Bad Request"})
+
+    db_reviews = Review.objects.filter(dealer_id=dealer_id).order_by('created_at')
+    if db_reviews.exists():
+        reviews = [
+            {
+                "id": r.id,
+                "name": r.name,
+                "dealership": r.dealer_id,
+                "review": r.review,
+                "purchase": r.purchase,
+                "purchase_date": r.purchase_date,
+                "car_make": r.car_make,
+                "car_model": r.car_model,
+                "car_year": r.car_year,
+                "sentiment": r.sentiment or "neutral",
+            }
+            for r in db_reviews
+        ]
+        return JsonResponse({"status": 200, "reviews": reviews})
+
+    # Fall back to Node.js backend if configured and DB is empty for this dealer
+    try:
+        endpoint = "/fetchReviews/dealer/" + str(dealer_id)
+        reviews = get_request(endpoint) or []
         for review_detail in reviews:
-            response = analyze_review_sentiments(review_detail['review'])
-            print(response)
-            review_detail['sentiment'] = response['sentiment']
-        return JsonResponse({"status":200,"reviews":reviews})
-    else:
-        return JsonResponse({"status":400,"message":"Bad Request"})
+            try:
+                response = analyze_review_sentiments(review_detail['review'])
+                review_detail['sentiment'] = response.get('sentiment', 'neutral')
+            except Exception:
+                review_detail['sentiment'] = 'neutral'
+        return JsonResponse({"status": 200, "reviews": reviews})
+    except Exception:
+        return JsonResponse({"status": 200, "reviews": []})
 
 
 # Ensure correct JSON format in get_dealer function
@@ -169,18 +193,40 @@ def add_review(request):
 
     try:
         data = json.loads(request.body)
-        
-        # Call the restapis post_review function to send to backend
-        result = post_review(data)
-        
-        # Return success response
-        return JsonResponse({"status": 200, "message": "Review submitted successfully"}, status=200)
+
+        # Analyze sentiment before saving
+        sentiment = 'neutral'
+        try:
+            response = analyze_review_sentiments(data.get('review', ''))
+            sentiment = response.get('sentiment', 'neutral')
+        except Exception:
+            pass
+
+        Review.objects.create(
+            dealer_id=data.get('dealership'),
+            name=data.get('name', ''),
+            review=data.get('review', ''),
+            purchase=data.get('purchase', True),
+            purchase_date=data.get('purchase_date', ''),
+            car_make=data.get('car_make', ''),
+            car_model=data.get('car_model', ''),
+            car_year=data.get('car_year', 2023),
+            sentiment=sentiment,
+        )
+
+        # Best-effort sync to Node.js backend
+        try:
+            post_review(data)
+        except Exception:
+            pass
+
+        return JsonResponse({"status": 200, "message": "Review submitted successfully"})
 
     except json.JSONDecodeError:
         return JsonResponse({"status": 400, "message": "Invalid JSON"}, status=400)
     except Exception as e:
-        logger.error(f"Error in adding review: {str(e)}")
-        return JsonResponse({"status": 500, "message": f"Error: {str(e)}"}, status=500)
+        logger.error(f"Error adding review: {str(e)}")
+        return JsonResponse({"status": 500, "message": str(e)}, status=500)
 
 
 
