@@ -61,35 +61,34 @@ def logout_user(request):
 
 @csrf_exempt
 def registration(request):
-    context = {}
-
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    first_name = data['firstName']
-    last_name = data['lastName']
-    email = data['email']
-    username_exist = False
-    email_exist = False
+    if request.method != 'POST':
+        return JsonResponse({"error": "POST required"}, status=405)
     try:
-        # Check if user already exists
+        data = json.loads(request.body)
+        username = data['userName']
+        password = data['password']
+        first_name = data['firstName']
+        last_name = data['lastName']
+        email = data['email']
+    except (json.JSONDecodeError, KeyError) as e:
+        return JsonResponse({"error": f"Missing field: {e}"}, status=400)
+
+    try:
         User.objects.get(username=username)
-        username_exist = True
-    except:
-        # If not, simply log this is a new user
+        return JsonResponse({"userName": username, "error": "Already Registered"})
+    except User.DoesNotExist:
         logger.debug("{} is new user".format(username))
 
-    # If it is a new user
-    if not username_exist:
-        # Create user in auth_user table
-        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,password=password, email=email)
-        # Login the user and redirect to list page
+    try:
+        user = User.objects.create_user(
+            username=username, first_name=first_name, last_name=last_name,
+            password=password, email=email
+        )
         login(request, user)
-        data = {"userName":username,"status":"Authenticated"}
-        return JsonResponse(data)
-    else :
-        data = {"userName":username,"error":"Already Registered"}
-        return JsonResponse(data)
+        return JsonResponse({"userName": username, "status": "Authenticated"})
+    except Exception as e:
+        logger.error(f"Registration error: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 #Update the `get_dealerships` render list of dealerships all by default, particular state if state is passed

@@ -21,32 +21,41 @@ const Register = () => {
   const register = async (e) => {
     e.preventDefault();
 
-    let register_url = window.location.origin+"/djangoapp/register";
-    
-    const res = await fetch(register_url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            "userName": userName,
-            "password": password,
-            "firstName":firstName,
-            "lastName":lastName,
-            "email":email
-        }),
-    });
+    if (!userName || !password || !firstName || !lastName || !email) {
+      alert("All fields are required.");
+      return;
+    }
 
-    const json = await res.json();
-    if (json.status) {
-        sessionStorage.setItem('username', json.userName);
+    try {
+      const register_url = window.location.origin + "/djangoapp/register";
+
+      const res = await fetch(register_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userName: userName,
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (json.status === "Authenticated") {
+        sessionStorage.setItem("username", json.userName);
         window.location.href = window.location.origin;
+      } else if (json.error === "Already Registered") {
+        alert("A user with that username is already registered.");
+      } else {
+        alert("Registration failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("An error occurred during registration. Please try again.");
     }
-    else if (json.error === "Already Registered") {
-      alert("The user with same username is already registered");
-      window.location.href = window.location.origin;
-    }
-};
+  };
 
   return(
     <div className="register_container" style={{width: "50%"}}>
