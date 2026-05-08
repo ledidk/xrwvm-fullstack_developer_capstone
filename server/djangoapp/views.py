@@ -70,20 +70,15 @@ def registration(request):
         first_name = data['firstName']
         last_name = data['lastName']
         email = data['email']
-    except (json.JSONDecodeError, KeyError) as e:
-        return JsonResponse({"error": f"Missing field: {e}"}, status=400)
 
-    try:
-        User.objects.get(username=username)
-        return JsonResponse({"userName": username, "error": "Already Registered"})
-    except User.DoesNotExist:
-        logger.debug("{} is new user".format(username))
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({"userName": username, "error": "Already Registered"})
 
-    try:
         user = User.objects.create_user(
             username=username, first_name=first_name, last_name=last_name,
-            password=password, email=email
+            password=password, email=email,
         )
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
         return JsonResponse({"userName": username, "status": "Authenticated"})
     except Exception as e:

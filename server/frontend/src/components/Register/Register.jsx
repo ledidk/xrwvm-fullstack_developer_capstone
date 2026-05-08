@@ -53,7 +53,7 @@ const Register = () => {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      alert("An error occurred during registration. Please try again.");
+      alert("An error occurred during registration: " + error.message);
     }
   };
 
